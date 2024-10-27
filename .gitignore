@@ -1,4 +1,5 @@
 /MvcLibrary/.vs
-/MvcLibrary/MvcLibrary/bin
-/MvcLibrary/MvcLibrary/obj
 MvcLibrary/MvcLibrary.sln
+/MvcLibrary/MvcLibrary/obj
+MvcLibrary/MvcLibrary/MvcLibrary.csproj
+MvcLibrary/MvcLibrary/MvcLibrary.csproj.user
