@@ -11,7 +11,13 @@ namespace MvcLibrary.Controllers
 
         public string Welcome()
         {
+         
             return "This is my welcome action...";
+        }
+
+        public string Books()
+        {
+            return "XD";
         }
     }
 }
