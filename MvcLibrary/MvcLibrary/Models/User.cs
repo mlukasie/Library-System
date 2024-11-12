@@ -15,5 +15,8 @@ namespace MvcLibrary.Models
         [Required]
         [EmailAddress]
         public string Email { get; set; }
+
+        [Required]
+        public bool IsLibrarian { get; set; }
     }
 }

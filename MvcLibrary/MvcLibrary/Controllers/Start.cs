@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using MvcLibrary.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MvcLibrary.Controllers
@@ -10,10 +14,9 @@ namespace MvcLibrary.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
-        public Start(UserManager<User> userManager, SignInManager<User> signInManager)
+        public Start(UserManager<User> userManager)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
         }
 
         [HttpGet]
@@ -33,7 +36,8 @@ namespace MvcLibrary.Controllers
                     Email = model.Email,
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    PhoneNumber = model.PhoneNumber
+                    PhoneNumber = model.PhoneNumber,
+                    IsLibrarian = false
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -65,10 +69,11 @@ namespace MvcLibrary.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, isPersistent:false, lockoutOnFailure: false);
-
-                if (result.Succeeded)
+                var user = await _userManager.FindByNameAsync(model.UserName);
+                if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
                 {
+                    var token = GenerateJwtToken(user);
+                    HttpContext.Response.Cookies.Append("AuthToken", token);
                     return RedirectToAction("Index", "Book");
                 }
 
@@ -77,5 +82,31 @@ namespace MvcLibrary.Controllers
 
             return View(model);
         }
+
+
+        public string GenerateJwtToken(User user)
+        {
+            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("1234567890abcdef1234567890abcdef1234567890abcdef"));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim>
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+    };
+            claims.Add(new Claim(ClaimTypes.Role, user.IsLibrarian ? "Librarian" : "User"));
+
+            var token = new JwtSecurityToken(
+                issuer: "https://localhost:7143",
+                audience: "https://localhost:7143",
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
     }
 }
+
+

@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MvcLibrary.Controllers
 {
+    [Authorize]
     public class HelloWorld : Controller
     {
         public IActionResult Index()
@@ -15,9 +17,15 @@ namespace MvcLibrary.Controllers
             return "This is my welcome action...";
         }
 
-        public string Books()
+        public string UserBooks()
         {
-            return "XD";
+            return "You are user";
+        }
+
+        [Authorize(Roles = "Librarian")]
+        public string LibrarianBooks()
+        {
+            return "You are librarian";
         }
     }
 }
