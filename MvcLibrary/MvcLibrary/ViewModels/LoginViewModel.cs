@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MvcLibrary.Models
+namespace MvcLibrary.ViewModels
 {
     public class LoginViewModel
     {
         [Required]
+        [Display(Name = "Username")]
         public string UserName { get; set; }
 
         [Required]

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using MvcLibrary.Models;
+using MvcLibrary.ViewModels;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -9,14 +10,15 @@ using System.Threading.Tasks;
 
 namespace MvcLibrary.Controllers
 {
-    public class Start : Controller
+    public class Account : Controller
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
-        public Start(UserManager<User> userManager)
+        public Account(UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         [HttpGet]
@@ -44,8 +46,6 @@ namespace MvcLibrary.Controllers
 
                 if (result.Succeeded)
                 {
-                    // Log in the user immediately after registration
-                    await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Login", "Start");
                 }
 
