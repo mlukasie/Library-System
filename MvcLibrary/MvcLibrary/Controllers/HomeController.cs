@@ -16,6 +16,10 @@ namespace MvcLibrary.Controllers
 
         public IActionResult Index()
         {
+            if (HttpContext.Request.Cookies.ContainsKey("AuthToken"))
+            {
+                return RedirectToAction("Index", "Book");
+            }
             return RedirectToAction("Login", "Account");
         }
 

@@ -5,7 +5,6 @@
 }
 
 <h1>Here are all the books we have</h1>
-<h4>Suit yourself</h4>
 
 <table class="table">
     <thead>
@@ -36,7 +35,9 @@
                     @Html.DisplayFor(modelItem => item.IsAvailable)
                 </td>
                 <td>
-                    <a asp-action="Reserve" asp-route-id="@item.Id">Reserve</a> |
+                    <form asp-action="Reserve" asp-controller="Book" asp-route-id="@item.Id" method="post">
+                        <button type="submit" class="btn btn-primary">Reserve</button>
+                    </form>
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a> 
                 </td>
             </tr>

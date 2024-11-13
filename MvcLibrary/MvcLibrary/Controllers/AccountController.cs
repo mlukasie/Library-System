@@ -73,7 +73,15 @@ namespace MvcLibrary.Controllers
                 if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
                 {
                     var token = GenerateJwtToken(user);
-                    HttpContext.Response.Cookies.Append("AuthToken", token);
+
+                    var cookieOptions = new CookieOptions
+                    {
+                        HttpOnly = true,       // Makes the cookie accessible only by the server
+                        Expires = DateTime.UtcNow.AddHours(1), // Sets the cookie to expire in 24 hours
+                        Secure = true          // Ensures the cookie is sent over HTTPS
+                    };
+
+                    HttpContext.Response.Cookies.Append("AuthToken", token, cookieOptions);
                     return RedirectToAction("Index", "Book");
                 }
 

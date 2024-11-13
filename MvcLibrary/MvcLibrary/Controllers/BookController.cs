@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,12 +41,6 @@ namespace MvcLibrary.Controllers
             }
         }
 
-        [Authorize(Roles =("User"))]
-        public string Reserve(int? id)
-        {
-            return "Reserved";
-        }
-
         // GET: Book/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -56,7 +51,7 @@ namespace MvcLibrary.Controllers
 
             var book = await _context.Book
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (book == null)
+            if (book == null || !book.IsVisible)
             {
                 return NotFound();
             }
