@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace MvcLibrary.Controllers
 {
-    public class Account : Controller
+    public class AccountController : Controller
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
-        public Account(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -81,6 +81,14 @@ namespace MvcLibrary.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Logout()
+        {
+            HttpContext.Response.Cookies.Delete("AuthToken");
+            return RedirectToAction("Login", "Account");
         }
 
 

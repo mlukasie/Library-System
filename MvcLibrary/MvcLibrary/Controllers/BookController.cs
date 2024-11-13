@@ -2,14 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MvcLibrary.Data;
+using MvcLibrary.Migrations;
 using MvcLibrary.Models;
 
 namespace MvcLibrary.Controllers
 {
+    [Authorize]
     public class BookController : Controller
     {
         private readonly MvcLibraryContext _context;
@@ -19,14 +22,28 @@ namespace MvcLibrary.Controllers
             _context = context;
         }
 
-        // GET: Book
         public async Task<IActionResult> Index()
         {
-            var books = await _context.Book
-                .Where(b => b.IsVisible)
-                .ToListAsync();
+            if (User.IsInRole("Librarian"))
+            {
+                var librarian_books = await _context.Book
+                    .ToListAsync();
 
-            return View(books);
+                return View("IndexLibrarian", librarian_books);
+            }
+            else
+            {
+                var user_books = await _context.Book
+                    .Where(b => b.IsVisible)
+                    .ToListAsync();
+                return View("IndexUser", user_books);
+            }
+        }
+
+        [Authorize(Roles =("User"))]
+        public string Reserve(int? id)
+        {
+            return "Reserved";
         }
 
         // GET: Book/Details/5
@@ -46,7 +63,7 @@ namespace MvcLibrary.Controllers
 
             return View(book);
         }
-
+        [Authorize(Roles = ("Librarian"))]
         // GET: Book/Create
         public IActionResult Create()
         {
@@ -58,19 +75,21 @@ namespace MvcLibrary.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseDate,isAvailable,description")] Book book)
+        [Authorize(Roles = ("Librarian"))]
+        public async Task<IActionResult> Create([Bind("Id,Title,Author,Publisher,ReleaseDate,IsAvailable,Description")] Book book)
         {
             if (ModelState.IsValid)
             {
                 book.IsVisible = true;
                 _context.Add(book);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Book");
             }
             return View(book);
         }
 
         // GET: Book/Edit/5
+        [Authorize(Roles = ("Librarian"))]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -91,7 +110,8 @@ namespace MvcLibrary.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,isAvailable,isVisible,description")] Book book)
+        [Authorize(Roles = ("Librarian"))]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Author,Publisher,ReleaseDate,IsAvailable,IsVisible,Description")] Book book)
         {
             if (id != book.Id)
             {
@@ -122,6 +142,7 @@ namespace MvcLibrary.Controllers
         }
 
         // GET: Book/Delete/5
+        [Authorize(Roles = ("Librarian"))]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -142,6 +163,7 @@ namespace MvcLibrary.Controllers
         // POST: Book/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = ("Librarian"))]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var book = await _context.Book.FindAsync(id);
