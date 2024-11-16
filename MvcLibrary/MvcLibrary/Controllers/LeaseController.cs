@@ -64,5 +64,56 @@ namespace MvcLibrary.Controllers
                 return View("IndexUser", user_leases);
             }
         }
+        [HttpPost]
+        [Authorize(Roles = ("Librarian"))]
+        public async Task<IActionResult> Lease(int id)
+        {
+            var reservation = await _context.Reservation.FindAsync(id);
+
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            if (DateTime.UtcNow.ToLocalTime() - reservation.ReservationDate > TimeSpan.FromHours(24))
+            {
+                _context.Reservation.Remove(reservation);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                Lease lease = new Lease
+                {
+                    BookId = reservation.BookId,
+                    UserId = reservation.UserId,
+                    IsActive = true,
+                    LeaseDate = DateTime.UtcNow.ToLocalTime(),
+                };
+
+                _context.Lease.Add(lease);
+                _context.Reservation.Remove(reservation);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = ("Librarian"))]
+        public async Task<IActionResult> Return(int id)
+        {
+            var lease = await _context.Lease.FindAsync(id);
+            if (!lease.IsActive)
+            {
+                return RedirectToAction("Index");
+            }
+            var book = await _context.Book.FindAsync(lease.BookId);
+            lease.IsActive = false;
+            book.IsAvailable = true;
+            _context.Lease.Update(lease);
+            _context.Book.Update(book);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
     }
 }

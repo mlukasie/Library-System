@@ -21,6 +21,8 @@ namespace MvcLibrary.Models
         public bool IsAvailable { get; set; }
         [Required]
         public string? Description { get; set; }
+
+        [Display(Name = "Deleted?")]
 		public bool IsVisible { get; set; }
 		
 	}

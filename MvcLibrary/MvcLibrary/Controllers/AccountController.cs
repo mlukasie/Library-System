@@ -57,11 +57,11 @@ namespace MvcLibrary.Controllers
             }
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            List<Reservation> reservations = await _context.Reservation
-                .Where(r => r.UserId == userId)
-                .ToListAsync();
+            bool hasReservations = await _context.Reservation.AnyAsync(r => r.UserId == userId);
+            bool hasActiveLeases = await _context.Lease.AnyAsync(l => l.UserId == userId && l.IsActive);
 
-            if (reservations.Count == 0)
+
+            if (!hasReservations && !hasActiveLeases)
             {
                 var user = await _userManager.FindByIdAsync(userId);
                 await _userManager.DeleteAsync(user);

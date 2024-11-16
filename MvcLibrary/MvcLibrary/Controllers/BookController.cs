@@ -51,7 +51,7 @@ namespace MvcLibrary.Controllers
 
             var book = await _context.Book
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (book == null || !book.IsVisible)
+            if (book == null || (!book.IsVisible && User.IsInRole("User")))
             {
                 return NotFound();
             }
@@ -71,11 +71,12 @@ namespace MvcLibrary.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = ("Librarian"))]
-        public async Task<IActionResult> Create([Bind("Id,Title,Author,Publisher,ReleaseDate,IsAvailable,Description")] Book book)
+        public async Task<IActionResult> Create([Bind("Id,Title,Author,Publisher,ReleaseDate,Description")] Book book)
         {
             if (ModelState.IsValid)
             {
                 book.IsVisible = true;
+                book.IsAvailable = true;
                 _context.Add(book);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index", "Book");
@@ -93,10 +94,6 @@ namespace MvcLibrary.Controllers
             }
 
             var book = await _context.Book.FindAsync(id);
-            if (book == null || !book.IsVisible)
-            {
-                return NotFound();
-            }
             return View(book);
         }
 
@@ -106,7 +103,7 @@ namespace MvcLibrary.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = ("Librarian"))]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Author,Publisher,ReleaseDate,IsAvailable,IsVisible,Description")] Book book)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Author,Publisher,IsAvailable,IsVisible,ReleaseDate,Description")] Book book)
         {
             if (id != book.Id)
             {
@@ -115,25 +112,23 @@ namespace MvcLibrary.Controllers
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(book);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BookExists(book.Id))
+                    var existingBook = await _context.Book.FindAsync(book.Id);
+
+                    if (existingBook != null)
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
+                        existingBook.Title = book.Title;
+                        existingBook.Author = book.Author;
+                        existingBook.Publisher = book.Publisher;
+                        existingBook.ReleaseDate = book.ReleaseDate;
+                        existingBook.Description = book.Description;
+                        existingBook.IsAvailable = book.IsAvailable;
+                        existingBook.IsVisible = book.IsVisible;
+
+                        _context.Update(existingBook);
+                        await _context.SaveChangesAsync();
                     }
                 }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(book);
+                return RedirectToAction("Index");
         }
 
         // GET: Book/Delete/5
@@ -174,6 +169,7 @@ namespace MvcLibrary.Controllers
             if (hadLeases)
             {
                 book.IsVisible = false;
+                book.IsAvailable = false;
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }

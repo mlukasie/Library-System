@@ -5,12 +5,12 @@
 }
 
 <p>
-    <button class="btn btn-primary" onclick="location.href='@Url.Action("Index", "Book")'">Books</button>
+    <button class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Book")'">Books</button>
     <button class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Reservation")'">Reservations</button>
     <button class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Lease")'">Leases</button>
 </p>
 
-<table class="table"></table>
+<table class="table">
 <thead>
     <tr>
         <th>
@@ -25,11 +25,12 @@
         <th>
             @Html.DisplayNameFor(model => model.IsActive)
         </th>
+        <th></th>
     </tr>
 </thead>
-<tbody>
-    @foreach (var item in Model)
-    {
+    <tbody>
+        @foreach (var item in Model)
+        {
         <tr>
             <td>
                 <a asp-action="Details" asp-controller="Book" asp-route-id="@item.BookId">@Html.DisplayFor(modelItem => item.Title)</a>
@@ -40,10 +41,16 @@
             <td>
                 @item.DateLease.ToString("yyyy-MM-dd HH:mm")
             </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsActive)
+                </td>
             <td>
-                <a asp-action="Return" asp-controller="Lease" asp-route-id="@item.LeaseId">Book returned</a>
+                <form asp-action="Return" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@item.LeaseId" />
+                    <button type="submit" class="btn btn-primary">Close Lease</button>
+                </form>
             </td>
         </tr>
-    }
-
-</tbody>
+        }
+    </tbody>
+</table>
