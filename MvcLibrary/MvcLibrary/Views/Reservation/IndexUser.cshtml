@@ -1,0 +1,38 @@
+﻿@model IEnumerable<MvcLibrary.ViewModels.ReservedBookViewModel>
+
+@{
+    ViewData["Title"] = "Reservations User";
+}
+
+<p>
+    <button class="btn btn-primary" onclick="location.href='@Url.Action("Index","Book")'">Back</button>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateReserved)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-action="Details" asp-controller="Book" asp-route-id="@item.BookId">@Html.DisplayFor(modelItem => item.Title)</a>
+                </td>
+                <td>
+                    @item.DateReserved.ToString("yyyy-MM-dd HH:mm")
+                </td>
+                <td>
+                    <a asp-action="Delete" asp-route-id="@item.ReservationId">Delete reservation</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

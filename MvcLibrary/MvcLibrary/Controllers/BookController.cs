@@ -93,7 +93,7 @@ namespace MvcLibrary.Controllers
             }
 
             var book = await _context.Book.FindAsync(id);
-            if (book == null)
+            if (book == null || !book.IsVisible)
             {
                 return NotFound();
             }
@@ -161,6 +161,12 @@ namespace MvcLibrary.Controllers
         [Authorize(Roles = ("Librarian"))]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            bool hasReservations = await _context.Reservation.AnyAsync(r => r.BookId == id);
+
+            if (hasReservations)
+            {
+           
+            }
             var book = await _context.Book.FindAsync(id);
             if (book != null)
             {

@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MvcLibrary.Data;
 using MvcLibrary.Models;
 using MvcLibrary.ViewModels;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,11 +17,79 @@ namespace MvcLibrary.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly MvcLibraryContext _context;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, MvcLibraryContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> MyDetails()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var userView = new UserViewModel
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+            };
+            return View("Details", userView);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Delete()
+        {
+            if(User.IsInRole("Librarian"))
+            {
+                return RedirectToAction("MyDetails");
+            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            List<Reservation> reservations = await _context.Reservation
+                .Where(r => r.UserId == userId)
+                .ToListAsync();
+
+            if (reservations.Count == 0)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                await _userManager.DeleteAsync(user);
+                return RedirectToAction("Login", "Account");
+            }
+
+            return RedirectToAction("MyDetails");
+        }
+
+        [Authorize(Roles = ("Librarian"))]
+        [HttpGet]
+        public async Task<IActionResult> Details(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var userView = new UserViewModel
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+            };
+            id = null;
+            return View(userView);
         }
 
         [HttpGet]
@@ -46,7 +117,7 @@ namespace MvcLibrary.Controllers
 
                 if (result.Succeeded)
                 {
-                    return RedirectToAction("Login", "Start");
+                    return RedirectToAction("Login", "Account");
                 }
 
                 foreach (var error in result.Errors)

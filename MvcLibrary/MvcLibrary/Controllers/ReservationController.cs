@@ -2,11 +2,14 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MvcLibrary.Data;
 using MvcLibrary.Migrations;
 using MvcLibrary.Models;
+using MvcLibrary.ViewModels;
+using static MvcLibrary.ViewModels.ReservedBookViewModel;
 
 namespace MvcLibrary.Controllers
 { 
@@ -58,5 +61,46 @@ namespace MvcLibrary.Controllers
 
             return RedirectToAction("Index", "Book");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            if (User.IsInRole("Librarian"))
+            {
+                List<ReservedBookViewModel> librarian_reservations = await _context.Reservation
+                    .Include(r  => r.Book)
+                    .Include(r => r.User)
+                    .Select(r => new ReservedBookViewModel
+                    {
+                        ReservationId = r.Id,
+                        DateReserved = r.ReservationDate,
+                        UserId = r.UserId,
+                        UserName = r.User.UserName,
+                        BookId = r.BookId,
+                        Title = r.Book.Title
+                    }).ToListAsync();
+                return View("IndexLibrarian", librarian_reservations);
+            }
+            else
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                List<ReservedBookViewModel> user_reservations = await _context.Reservation.Include(r => r.Book).
+                     Select(r => new ReservedBookViewModel
+                     {
+                         ReservationId = r.Id,
+                         DateReserved = r.ReservationDate,
+                         UserId = r.UserId,
+                         BookId = r.BookId,
+                         Title = r.Book.Title
+                     })
+                     .Where(r=>r.UserId == userId)
+                     .ToListAsync();
+                return View("IndexUser", user_reservations);
+            }
+
+        }
+
+
+
     }
 }

@@ -4,7 +4,10 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<p>
+    <button class="btn btn-primary" onclick="location.href='@Url.Action("Index", "Book")'">Books</button>
+    <button class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Reservation")'">Reservations</button>
+</p>
 
 <div>
     <h4>Book</h4>
@@ -48,6 +51,4 @@
         </dd>
     </dl>
 </div>
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+
