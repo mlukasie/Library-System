@@ -5,7 +5,9 @@
 }
 
 <p>
-    <button class="btn btn-primary" onclick="location.href='@Url.Action("Index","Book")'">Back</button>
+    <button class="btn btn-primary" onclick="location.href='@Url.Action("Index", "Book")'">Books</button>
+    <button class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Reservation")'">Reservations</button>
+    <button class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Lease")'">Leases</button>
 </p>
 <table class="table">
     <thead>
@@ -36,9 +38,16 @@
                     @item.DateReserved.ToString("yyyy-MM-dd HH:mm")
                 </td>
                 <td>
-                    <a asp-action="Lease" asp-route-id="@item.ReservationId">Lease book</a> |
-                    <a asp-action="Delete" asp-route-id="@item.ReservationId">Delete reservation</a>
+                    <form asp-action="Lease" asp-controller="Lease" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@item.ReservationId" />
+                        <button type="submit" class="btn btn-primary">Lease</button>
+                    </form>
+                    <form asp-action="Delete" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@item.ReservationId" />
+                        <button type="submit" class="btn btn-danger">Delete Reservation</button>
+                    </form>
                 </td>
+                    
             </tr>
         }
     </tbody>

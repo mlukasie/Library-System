@@ -1,7 +1,7 @@
-﻿@model IEnumerable<MvcLibrary.ViewModels.ReservedBookViewModel>
+﻿@model IEnumerable<MvcLibrary.ViewModels.LeaseViewModel>
 
 @{
-    ViewData["Title"] = "Reservations User";
+    ViewData["Title"] = "Leases User";
 }
 
 <p>
@@ -16,7 +16,7 @@
                 @Html.DisplayNameFor(model => model.Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateReserved)
+                @Html.DisplayNameFor(model => model.DateLease)
             </th>
             <th></th>
         </tr>
@@ -29,13 +29,10 @@
                     <a asp-action="Details" asp-controller="Book" asp-route-id="@item.BookId">@Html.DisplayFor(modelItem => item.Title)</a>
                 </td>
                 <td>
-                    @item.DateReserved.ToString("yyyy-MM-dd HH:mm")
+                    @item.DateLease.ToString("yyyy-MM-dd HH:mm")
                 </td>
                 <td>
-                    <form asp-action="Delete" method="post" class="d-inline">
-                        <input type="hidden" name="id" value="@item.ReservationId" />
-                        <button type="submit" class="btn btn-danger">Delete Reservation</button>
-                    </form>
+                    @Html.DisplayFor(modelItem => item.IsActive)
                 </td>
             </tr>
         }

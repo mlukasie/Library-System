@@ -162,19 +162,26 @@ namespace MvcLibrary.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             bool hasReservations = await _context.Reservation.AnyAsync(r => r.BookId == id);
+            bool hasActiveLeases = await _context.Lease.AnyAsync(l => l.BookId == id && l.IsActive);
+            bool hadLeases = await _context.Lease.AnyAsync(l => l.BookId == id && !l.IsActive);
 
-            if (hasReservations)
-            {
-           
-            }
             var book = await _context.Book.FindAsync(id);
-            if (book != null)
+
+            if (hasReservations || hasActiveLeases)
             {
-                _context.Book.Remove(book);
+                return RedirectToAction("Index");
+            }
+            if (hadLeases)
+            {
+                book.IsVisible = false;
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index");
             }
 
+            _context.Book.Remove(book);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return RedirectToAction("Index");
         }
 
         private bool BookExists(int id)

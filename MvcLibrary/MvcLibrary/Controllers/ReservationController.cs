@@ -9,7 +9,6 @@ using MvcLibrary.Data;
 using MvcLibrary.Migrations;
 using MvcLibrary.Models;
 using MvcLibrary.ViewModels;
-using static MvcLibrary.ViewModels.ReservedBookViewModel;
 
 namespace MvcLibrary.Controllers
 { 
@@ -49,7 +48,7 @@ namespace MvcLibrary.Controllers
             {
                 BookId = id,
                 UserId = userId,
-                ReservationDate = DateTime.UtcNow,
+                ReservationDate = DateTime.UtcNow.ToLocalTime(),
             };
 
             // Mark the book as unavailable (Status = false)
@@ -99,8 +98,17 @@ namespace MvcLibrary.Controllers
             }
 
         }
-
-
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var reservation = await _context.Reservation.FindAsync(id);
+            var book = await _context.Book.FindAsync(reservation.BookId);
+            book.IsAvailable = true;
+            _context.Book.Update(book);
+            _context.Reservation.Remove(reservation);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
 
     }
 }
