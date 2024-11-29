@@ -42,8 +42,8 @@ namespace MvcLibrary.Controllers
             {
                 BookId = id,
                 UserId = userId,
-                ReservationDate = DateTime.UtcNow.AddDays(-2).ToLocalTime(),
-                //ReservationDate = DateTime.UtcNow.ToLocalTime()
+                //ReservationDate = DateTime.UtcNow.AddDays(-2).ToLocalTime(),
+                ReservationDate = DateTime.UtcNow.ToLocalTime()
             };
 
             
