@@ -9,6 +9,9 @@
     <button class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Reservation")'">Reservations</button>
     <button class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Lease")'">Leases</button>
 </p>
+<form asp-action="DeleteInactive" method="post">
+    <button type="submit" class="btn-outline-danger"> Delete Inactive Requests</button>
+</form>
 <table class="table">
     <thead>
         <tr>

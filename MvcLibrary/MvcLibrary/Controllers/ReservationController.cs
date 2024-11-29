@@ -28,28 +28,29 @@ namespace MvcLibrary.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var existingReservation = await _context.Reservation
-                .FirstOrDefaultAsync(r => r.BookId == id && r.UserId == userId);
+                .FirstOrDefaultAsync(r => r.BookId == id);
 
-            if (existingReservation != null)
-            {
-                ModelState.AddModelError("", "You already have an active reservation for this book.");
-                return RedirectToAction("Index", "Book");
-            }
-
+            var oneDayAgo = DateTime.UtcNow.AddDays(-1).ToLocalTime();
             var book = await _context.Book.FindAsync(id);
-            if (book == null || !book.IsAvailable)
+            if (book == null || !book.IsVisible || (existingReservation != null && existingReservation.ReservationDate > oneDayAgo))
             {
                 ModelState.AddModelError("", "This book is currently not available for reservation.");
                 return RedirectToAction("Index", "Book");
             }
 
-            // Create a new reservation
             var reservation = new Reservation
             {
                 BookId = id,
                 UserId = userId,
-                ReservationDate = DateTime.UtcNow.ToLocalTime(),
+                ReservationDate = DateTime.UtcNow.AddDays(-2).ToLocalTime(),
+                //ReservationDate = DateTime.UtcNow.ToLocalTime()
             };
+
+            
+            if (existingReservation != null && existingReservation.ReservationDate < oneDayAgo)
+            {
+                _context.Reservation.Remove(existingReservation);
+            }
 
             // Mark the book as unavailable (Status = false)
             book.IsAvailable = false;
@@ -106,6 +107,24 @@ namespace MvcLibrary.Controllers
             book.IsAvailable = true;
             _context.Book.Update(book);
             _context.Reservation.Remove(reservation);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = ("Librarian"))]
+        public async Task<IActionResult> DeleteInactive()
+        {
+            var oneDayAgo = DateTime.UtcNow.AddDays(-1).ToLocalTime();
+            var reservations = await _context.Reservation.Where(r => r.ReservationDate < oneDayAgo)
+                .ToListAsync();
+            foreach (var reservation in reservations)
+            {
+                var book = await _context.Book.FindAsync(reservation.BookId);
+                book.IsAvailable = true;
+                _context.Book.Update(book);
+                _context.Reservation.Remove(reservation);
+            }
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }

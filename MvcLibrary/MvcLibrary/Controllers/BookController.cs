@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using MvcLibrary.Data;
 using MvcLibrary.Migrations;
 using MvcLibrary.Models;
+using MvcLibrary.ViewModels;
 
 namespace MvcLibrary.Controllers
 {
@@ -34,9 +35,18 @@ namespace MvcLibrary.Controllers
             }
             else
             {
+                var oneDayAgo = DateTime.UtcNow.AddDays(-1).ToLocalTime();
                 var user_books = await _context.Book
-                    .Where(b => b.IsVisible)
-                    .ToListAsync();
+                    .Where(b => b.IsVisible) // Only include visible books
+                    .Select(b => new BookViewModel
+                    {
+                        Id = b.Id,
+                        Title = b.Title,
+                        ReleaseDate = b.ReleaseDate,
+                        IsReservedOrLeased = _context.Lease.Any(l => l.BookId == b.Id && l.IsActive) ||
+                                                _context.Reservation.Any(r => r.BookId == b.Id && r.ReservationDate >= oneDayAgo)
+                    })
+    .ToListAsync();
                 return View("IndexUser", user_books);
             }
         }

@@ -77,6 +77,9 @@ namespace MvcLibrary.Controllers
 
             if (DateTime.UtcNow.ToLocalTime() - reservation.ReservationDate > TimeSpan.FromHours(24))
             {
+                var book = await _context.Book.FindAsync(reservation.BookId);
+                book.IsAvailable = true;
+                _context.Book.Update(book);
                 _context.Reservation.Remove(reservation);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
@@ -90,7 +93,7 @@ namespace MvcLibrary.Controllers
                     IsActive = true,
                     LeaseDate = DateTime.UtcNow.ToLocalTime(),
                 };
-
+               
                 _context.Lease.Add(lease);
                 _context.Reservation.Remove(reservation);
                 await _context.SaveChangesAsync();
