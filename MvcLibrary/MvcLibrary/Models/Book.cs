@@ -24,6 +24,9 @@ namespace MvcLibrary.Models
 
         [Display(Name = "Deleted?")]
 		public bool IsVisible { get; set; }
-		
-	}
+
+        [Timestamp]
+        public byte[] Timestamp { get; set; }
+
+    }
 }

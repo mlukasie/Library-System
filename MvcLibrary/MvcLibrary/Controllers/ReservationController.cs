@@ -51,14 +51,19 @@ namespace MvcLibrary.Controllers
             {
                 _context.Reservation.Remove(existingReservation);
             }
-
-            // Mark the book as unavailable (Status = false)
-            book.IsAvailable = false;
-            _context.Book.Update(book);
-
-            _context.Reservation.Add(reservation);
-            await _context.SaveChangesAsync();
-
+            await Task.Delay(TimeSpan.FromSeconds(10));
+            try
+            {
+                book.IsAvailable = false;
+                _context.Book.Update(book);
+                _context.Reservation.Add(reservation);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                ModelState.AddModelError("", "This book was updated by another user. Please try again.");
+                return RedirectToAction("Index", "Book");
+            }
             return RedirectToAction("Index", "Book");
         }
 

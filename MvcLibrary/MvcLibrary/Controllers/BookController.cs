@@ -113,7 +113,7 @@ namespace MvcLibrary.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = ("Librarian"))]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Author,Publisher,IsAvailable,IsVisible,ReleaseDate,Description")] Book book)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Author,Publisher,IsAvailable,IsVisible,ReleaseDate,Description,Timestamp")] Book book)
         {
             if (id != book.Id)
             {
@@ -122,24 +122,23 @@ namespace MvcLibrary.Controllers
 
             if (ModelState.IsValid)
             {
-                    var existingBook = await _context.Book.FindAsync(book.Id);
-
-                    if (existingBook != null)
-                    {
-                        existingBook.Title = book.Title;
-                        existingBook.Author = book.Author;
-                        existingBook.Publisher = book.Publisher;
-                        existingBook.ReleaseDate = book.ReleaseDate;
-                        existingBook.Description = book.Description;
-                        existingBook.IsAvailable = book.IsAvailable;
-                        existingBook.IsVisible = book.IsVisible;
-
-                        _context.Update(existingBook);
-                        await _context.SaveChangesAsync();
-                    }
+                try
+                {
+                    _context.Update(book);
+                    await _context.SaveChangesAsync();
                 }
+                catch (DbUpdateConcurrencyException)
+                {
+                    ModelState.AddModelError("", "This book was updated by another user. Please try again.");
+                    return View(book);
+                }
+
                 return RedirectToAction("Index");
+            }
+            return View(book);
+
         }
+
 
         // GET: Book/Delete/5
         [Authorize(Roles = ("Librarian"))]
