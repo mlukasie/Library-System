@@ -35,6 +35,10 @@ namespace MvcLibrary.Controllers
             }
             else
             {
+                if (TempData.ContainsKey("ErrorMessage"))
+                {
+                    ViewBag.ErrorMessage = TempData["ErrorMessage"];
+                }
                 var oneDayAgo = DateTime.UtcNow.AddDays(-1).ToLocalTime();
                 var user_books = await _context.Book
                     .Where(b => b.IsVisible) // Only include visible books
@@ -44,7 +48,8 @@ namespace MvcLibrary.Controllers
                         Title = b.Title,
                         ReleaseDate = b.ReleaseDate,
                         IsReservedOrLeased = _context.Lease.Any(l => l.BookId == b.Id && l.IsActive) ||
-                                                _context.Reservation.Any(r => r.BookId == b.Id && r.ReservationDate >= oneDayAgo)
+                                                _context.Reservation.Any(r => r.BookId == b.Id && r.ReservationDate >= oneDayAgo),
+                        Timestamp = b.Timestamp
                     })
     .ToListAsync();
                 return View("IndexUser", user_books);
@@ -69,6 +74,7 @@ namespace MvcLibrary.Controllers
             return View(book);
         }
         [Authorize(Roles = ("Librarian"))]
+
         // GET: Book/Create
         public IActionResult Create()
         {

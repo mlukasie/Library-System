@@ -8,9 +8,12 @@
 <button class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Reservation")'">Your Reservations</button>
 <button class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Lease")'"> Your Leases</button>
 </p>
-<div class="text-danger">
-    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-</div>
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        @ViewBag.ErrorMessage
+    </div>
+}
 <table class="table">
     <thead>
         <tr>
@@ -35,9 +38,7 @@
                 </td>
                 <td>
                     <form asp-action="Reserve" asp-controller="Reservation" asp-route-id="@item.Id" method="post">
-                        <div class="text-danger">
-                            @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-                        </div>
+                        <input type="hidden" name="timestamp" value="@Convert.ToBase64String(item.Timestamp)" />
                         <button type="submit" 
                                 class="btn @(item.IsReservedOrLeased ? "btn-secondary" : "btn-primary")"
                                 disabled="@(item.IsReservedOrLeased)">

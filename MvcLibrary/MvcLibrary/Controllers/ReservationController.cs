@@ -22,7 +22,7 @@ namespace MvcLibrary.Controllers
         }
         [HttpPost]
         [Authorize(Roles = ("User"))]
-        public async Task<IActionResult> Reserve(int? id)
+        public async Task<IActionResult> Reserve(int? id, string timestamp)
         {
             // Get the current logged-in user
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -47,11 +47,15 @@ namespace MvcLibrary.Controllers
             };
 
             
+
             if (existingReservation != null && existingReservation.ReservationDate < oneDayAgo)
             {
                 _context.Reservation.Remove(existingReservation);
             }
-            await Task.Delay(TimeSpan.FromSeconds(10));
+
+            var decodedTimestamp = Convert.FromBase64String(timestamp);
+            _context.Entry(book).Property(d => d.Timestamp).OriginalValue = decodedTimestamp;
+
             try
             {
                 book.IsAvailable = false;
@@ -61,7 +65,7 @@ namespace MvcLibrary.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                ModelState.AddModelError("", "This book was updated by another user. Please try again.");
+                TempData["ErrorMessage"] = "This book was updated by another user. Please try again.";
                 return RedirectToAction("Index", "Book");
             }
             return RedirectToAction("Index", "Book");

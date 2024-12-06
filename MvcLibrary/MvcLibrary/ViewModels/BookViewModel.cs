@@ -12,5 +12,7 @@ namespace MvcLibrary.ViewModels
         public DateTime? ReleaseDate { get; set; }
 
         public bool IsReservedOrLeased { get; set; }
+        [Timestamp]
+        public byte[] Timestamp { get; set; }
     }
 }
