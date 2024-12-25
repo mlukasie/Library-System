@@ -1,4 +1,5 @@
 ﻿using LibraryApi.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -47,6 +48,7 @@ public class UserController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] Login model)
     {
+        Console.WriteLine("Zapytanie dotarło do serwera.");
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Email == model.Email);
 
