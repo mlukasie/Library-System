@@ -58,7 +58,16 @@ public class UserController : ControllerBase
         }
 
         var token = _jwtService.GenerateToken(user);
-        return Ok(new { token });
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,      
+            Expires = DateTime.UtcNow.AddHours(1), 
+            Secure = true      
+        };
+
+        HttpContext.Response.Cookies.Append("AuthToken", token, cookieOptions);
+
+        return Ok(new { message = "Login successful" });
     }
 
     private string HashPassword(string password)

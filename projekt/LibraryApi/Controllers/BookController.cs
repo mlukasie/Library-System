@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 [Route("api/[controller]")]
 [ApiController]
-
+[Authorize]
 public class BooksController : ControllerBase
 {
     private readonly LibraryDbContext _context;
