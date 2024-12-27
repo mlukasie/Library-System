@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace LibraryApi.Models
+namespace LibraryApi.Models.DTO
 {
-    public class Book
+    public class CreateBook
     {
-        public int Id { get; set; }
         [Required]
         public string Title { get; set; }
         [Required]
@@ -14,9 +13,5 @@ namespace LibraryApi.Models
         [Required]
         [DataType(DataType.Date)]
         public DateTime ReleaseDate { get; set; }
-        [Required]
-        public bool IsVisible { get; set; }
-
     }
-
 }

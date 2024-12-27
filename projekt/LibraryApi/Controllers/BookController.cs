@@ -2,6 +2,7 @@ using LibraryApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LibraryApi.Models.DTO;
 
 
 [Route("api/[controller]")]
@@ -16,10 +17,36 @@ public class BooksController : ControllerBase
         _context = context;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
+    [HttpGet("LibrarianBooks")]
+    [Authorize(Roles = ("Librarian"))]
+    public async Task<ActionResult<IEnumerable<Book>>> GetLibrarianBooks()
     {
-        return await _context.Books.ToListAsync();
+        var books = await _context.Books.ToListAsync();
+        var bookDtos = books.Select(b => new LibrarianBook
+        {
+            Id = b.Id,
+            Title = b.Title,
+            Author = b.Author,
+            IsVisible = b.IsVisible,
+        });
+        return Ok(bookDtos);
+    }
+
+    [HttpGet("UserBooks")]
+    [Authorize(Roles = ("User"))]
+    public async Task<ActionResult<IEnumerable<Book>>> GetUserBooks()
+    {
+        var books = await _context.Books
+            .Where(b => b.IsVisible)
+            .ToListAsync();
+        var bookDtos = books.Select(b => new UserBook
+        {
+            Id = b.Id,
+            Title = b.Title,
+            Author = b.Author,
+            isAvailable = true,
+        });
+        return Ok(bookDtos);
     }
 
     [HttpGet("{id}")]
@@ -36,15 +63,26 @@ public class BooksController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Book>> PostBook(Book book)
+    [Authorize(Roles = ("Librarian"))]
+    public async Task<ActionResult<Book>> PostBook(CreateBook book)
     {
-        _context.Books.Add(book);
+        var newBook = new Book
+        {
+            Title = book.Title,
+            Author = book.Author,
+            Publisher = book.Publisher,
+            ReleaseDate = book.ReleaseDate.ToUniversalTime(),
+            IsVisible = true,
+        };
+
+        _context.Books.Add(newBook);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
+        return CreatedAtAction(nameof(GetBook), new { id = newBook.Id }, newBook);
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = ("Librarian"))]
     public async Task<IActionResult> PutBook(int id, Book book)
     {
         if (id != book.Id)
@@ -71,6 +109,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = ("Librarian"))]
     public async Task<IActionResult> DeleteBook(int id)
     {
         var book = await _context.Books.FindAsync(id);

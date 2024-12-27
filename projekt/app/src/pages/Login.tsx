@@ -15,7 +15,7 @@ const Login: React.FC = () => {
             email: email,
             password: password,
         };
-      const response = await fetch('https://localhost:7183/api/User/login', {
+      const response = await fetch('/api/Account/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -26,16 +26,35 @@ const Login: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Login failed');
+      };
+
+      const roleResponse = await fetch('/api/Account/role', {
+        method: 'GET',
+        credentials: 'include',
+      });
+  
+      if (!roleResponse.ok) {
+        const errorData = await roleResponse.json();
+        throw new Error(errorData.message || 'Failed to get role');
       }
-      const data = await response.json();
-      navigate('/Books')
+  
+      const roleData = await roleResponse.json();
+      const userRole = roleData.role;
+      
+      if (userRole === 'Librarian') {
+        navigate('/Librarian-dashboard');
+      } else if (userRole === 'User') {
+        navigate('/User-dashboard');
+      } else {
+        throw new Error('Unknown role');
+      }
     } catch (error: any) {
       setErrorMessage(error.message || 'Login failed. Please try again.');
     }
   };
 
   const handleSignUp = () => {
-    navigate('/signup'); // Navigate to the signup page on click
+    navigate('/signup');
   };
 
   return (

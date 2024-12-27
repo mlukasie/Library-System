@@ -1,19 +1,24 @@
 ﻿using LibraryApi.Models;
+using LibraryApi.Models.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserController : ControllerBase
+public class AccountController : ControllerBase
 {
     private readonly LibraryDbContext _context;
     private readonly JwtService _jwtService;
 
-    public UserController(LibraryDbContext context, JwtService jwtService)
+    public AccountController(LibraryDbContext context, JwtService jwtService)
     {
         _context = context;
         _jwtService = jwtService;
@@ -21,7 +26,7 @@ public class UserController : ControllerBase
 
     // Rejestracja użytkownika
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] User model)
+    public async Task<IActionResult> Register([FromBody] RegisterUser model)
     {
         if (await _context.Users.AnyAsync(u => u.Email == model.Email))
         {
@@ -44,11 +49,9 @@ public class UserController : ControllerBase
         return Ok(new { message = "User registered successfully." });
     }
 
-    // Logowanie użytkownika
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] Login model)
     {
-        Console.WriteLine("Zapytanie dotarło do serwera.");
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Email == model.Email);
 
@@ -70,6 +73,14 @@ public class UserController : ControllerBase
         return Ok(new { message = "Login successful" });
     }
 
+    [HttpGet("role")]
+    [Authorize]
+    public IActionResult GetRole()
+    {
+        var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role).Value;
+        return Ok(new {Role = role });
+    }
+
     private string HashPassword(string password)
     {
         using (var sha256 = SHA256.Create())
@@ -79,8 +90,20 @@ public class UserController : ControllerBase
         }
     }
 
+
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        HttpContext.Response.Cookies.Delete("AuthToken");
+        return Ok();
+    }
+
+
     private bool VerifyPassword(string password, string hashedPassword)
     {
         return hashedPassword == HashPassword(password);
     }
+
+
 }
+

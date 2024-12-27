@@ -1,6 +1,4 @@
 ﻿using LibraryApi.Models;
-using LibraryApi;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -25,7 +23,7 @@ public class JwtService
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Role, user.IsLibrarian ? "Admin" : "User")
+            new Claim(ClaimTypes.Role, user.IsLibrarian ? "Librarian" : "User")
         };
 
         var token = new JwtSecurityToken(
@@ -40,7 +38,7 @@ public class JwtService
 
     public ClaimsPrincipal ValidateToken(string token)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key)); // Użycie klucza z konfiguracji
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
         var handler = new JwtSecurityTokenHandler();
 
         try
