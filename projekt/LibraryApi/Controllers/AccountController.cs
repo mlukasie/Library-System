@@ -50,7 +50,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] Login model)
+    public async Task<IActionResult> Login([FromBody] LoginUser model)
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Email == model.Email);

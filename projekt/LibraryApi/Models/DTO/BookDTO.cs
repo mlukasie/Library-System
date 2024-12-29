@@ -2,7 +2,7 @@
 
 namespace LibraryApi.Models.DTO
 {
-    public class CreateBook
+    public class BookDTO
     {
         [Required]
         public string Title { get; set; }
@@ -12,6 +12,6 @@ namespace LibraryApi.Models.DTO
         public string Publisher { get; set; }
         [Required]
         [DataType(DataType.Date)]
-        public DateTime ReleaseDate { get; set; }
+        public DateOnly ReleaseDate { get; set; }
     }
 }

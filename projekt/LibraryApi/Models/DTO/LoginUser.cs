@@ -2,7 +2,7 @@
 
 namespace LibraryApi.Models.DTO
 {
-    public class Login
+    public class LoginUser
     {
         [Required]
         [EmailAddress]

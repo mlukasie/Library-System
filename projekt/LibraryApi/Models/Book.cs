@@ -13,7 +13,7 @@ namespace LibraryApi.Models
         public string Publisher { get; set; }
         [Required]
         [DataType(DataType.Date)]
-        public DateTime ReleaseDate { get; set; }
+        public DateOnly ReleaseDate { get; set; }
         [Required]
         public bool IsVisible { get; set; }
 

@@ -19,7 +19,7 @@ public class BooksController : ControllerBase
 
     [HttpGet("LibrarianBooks")]
     [Authorize(Roles = ("Librarian"))]
-    public async Task<ActionResult<IEnumerable<Book>>> GetLibrarianBooks()
+    public async Task<ActionResult<IEnumerable<LibrarianBook>>> GetLibrarianBooks()
     {
         var books = await _context.Books.ToListAsync();
         var bookDtos = books.Select(b => new LibrarianBook
@@ -34,7 +34,7 @@ public class BooksController : ControllerBase
 
     [HttpGet("UserBooks")]
     [Authorize(Roles = ("User"))]
-    public async Task<ActionResult<IEnumerable<Book>>> GetUserBooks()
+    public async Task<ActionResult<IEnumerable<UserBook>>> GetUserBooks()
     {
         var books = await _context.Books
             .Where(b => b.IsVisible)
@@ -50,7 +50,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Book>> GetBook(int id)
+    public async Task<ActionResult<BookDTO>> GetBook(int id)
     {
         var book = await _context.Books.FindAsync(id);
 
@@ -59,19 +59,26 @@ public class BooksController : ControllerBase
             return NotFound();
         }
 
-        return book;
+        var bookDTO = new BookDTO
+        {
+            Title = book.Title,
+            Author = book.Author,
+            ReleaseDate = book.ReleaseDate,
+            Publisher = book.Publisher,
+        };
+        return Ok(bookDTO);
     }
 
     [HttpPost]
     [Authorize(Roles = ("Librarian"))]
-    public async Task<ActionResult<Book>> PostBook(CreateBook book)
+    public async Task<ActionResult<Book>> PostBook(BookDTO book)
     {
         var newBook = new Book
         {
             Title = book.Title,
             Author = book.Author,
             Publisher = book.Publisher,
-            ReleaseDate = book.ReleaseDate.ToUniversalTime(),
+            ReleaseDate = book.ReleaseDate,
             IsVisible = true,
         };
 
@@ -83,29 +90,28 @@ public class BooksController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Roles = ("Librarian"))]
-    public async Task<IActionResult> PutBook(int id, Book book)
+    public async Task<IActionResult> PutBook(int id, BookDTO bookDto)
     {
-        if (id != book.Id)
+        var book = await _context.Books.FindAsync(id);
+        if (book == null)
         {
-            return BadRequest();
+            return NotFound();
         }
-
-        _context.Entry(book).State = EntityState.Modified;
 
         try
         {
+            book.Title = bookDto.Title;
+            book.Author = bookDto.Author;
+            book.Publisher = bookDto.Publisher;
+            book.ReleaseDate = bookDto.ReleaseDate;
+            _context.Update(book);
             await _context.SaveChangesAsync();
+            return NoContent();
         }
-        catch (DbUpdateConcurrencyException)
+        catch (Exception ex)
         {
-            if (!_context.Books.Any(e => e.Id == id))
-            {
-                return NotFound();
-            }
-            throw;
+            return StatusCode(500, "An error occurred while updating the book.");
         }
-
-        return NoContent();
     }
 
     [HttpDelete("{id}")]
