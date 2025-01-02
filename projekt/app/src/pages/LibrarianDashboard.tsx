@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { checkUserRole } from './services/checkUserRole';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -11,26 +10,20 @@ interface Book {
 }
 
 const LibrarianDashboard: React.FC = () => {
-  const [isRoleChecked, setIsRoleChecked] = useState(false);
-  const [roleValid, setRoleValid] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [books, setBooks] = useState<Book[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   
-  useEffect(() => {
-    const fetchRole = async () => {
-      const roleValid = await checkUserRole('Librarian');
-      setRoleValid(roleValid);
-      setIsRoleChecked(true);
-    };
-
-    fetchRole();
-  }, []);
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
         const response = await fetch("/api/Books/LibrarianBooks");
+        if (response.status === 401 || response.status === 403) {
+          navigate('/unauthorized');
+          return;
+        }
         if (!response.ok) {
           throw new Error("Failed to fetch books");
         }
@@ -38,18 +31,19 @@ const LibrarianDashboard: React.FC = () => {
         setBooks(data);
       } catch (error) {
         console.error("Error fetching books:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchBooks();
-  }, []);
+  }, [navigate]);
 
   const handleLogout = async () => {
       try {
         const response = await fetch('/api/Account/logout', {
           method: 'POST',
         });
-  
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Logout failed');
@@ -58,15 +52,13 @@ const LibrarianDashboard: React.FC = () => {
       }
       catch (error: any) {
         setErrorMessage(error.message || 'Logout failed. Please try again.');
-      };
+      }
+      
   }
 
-  if (!isRoleChecked) {
-    return <div>Loading...</div>;
-  }
-
-  if (!roleValid) {
-    navigate('/unauthorized');
+  if (loading)
+  {
+    return  <div>Loading...</div>;
   }
 
   return (

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { checkUserRole } from './services/checkUserRole';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface Book {
@@ -16,22 +15,15 @@ const DeleteBook: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const [isRoleChecked, setIsRoleChecked] = useState(false);
-  const [roleValid, setRoleValid] = useState(true);
-  useEffect(() => {
-      const fetchRole = async () => {
-        const roleValid = await checkUserRole('Librarian');
-        setRoleValid(roleValid);
-        setIsRoleChecked(true);
-      };
-  
-      fetchRole();
-    }, []);
 
   useEffect(() => {
     const fetchBookDetails = async () => {
       try {
         const response = await fetch(`/api/Books/${id}`);
+        if (response.status === 401 || response.status === 403) {
+          navigate('/unauthorized');
+          return;
+        }
         if (!response.ok) {
           throw new Error('Failed to fetch book details');
         }
@@ -45,7 +37,7 @@ const DeleteBook: React.FC = () => {
     };
 
     fetchBookDetails();
-  }, [id]);
+  }, [id, navigate]);
 
 
   const handleDelete = async () => {
@@ -54,25 +46,19 @@ const DeleteBook: React.FC = () => {
         const response = await fetch(`/api/Books/${id}`, {
             method: 'DELETE',
         });
-
+        if (response.status === 401 || response.status === 403) {
+          navigate('/unauthorized');
+          return;
+        }
         if (!response.ok) {
             throw new Error('Failed to delete book');
         }
-
         alert('Book deleted successfully!');
         navigate('/Librarian-Dashboard');
         } catch (error) {
         console.error('Error deleting book:', error);
         }
     }}
-
-  if (!isRoleChecked) {
-    return <div className="text-center mt-5"><strong>Loading...</strong></div>;
-  }
-
-  if (!roleValid) {
-    navigate('/unauthorized');
-  }
 
   if (loading) {
     return <div>Loading...</div>;
@@ -84,7 +70,7 @@ const DeleteBook: React.FC = () => {
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-4">Book Details</h2>
+      <h2 className="mb-4">Delete Book</h2>
 
       <div className="mb-3">
         <strong>Title:</strong> {book.title}

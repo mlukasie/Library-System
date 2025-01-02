@@ -81,6 +81,14 @@ public class AccountController : ControllerBase
         return Ok(new {Role = role });
     }
 
+
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        HttpContext.Response.Cookies.Delete("AuthToken");
+        return Ok();
+    }
+
     private string HashPassword(string password)
     {
         using (var sha256 = SHA256.Create())
@@ -91,12 +99,6 @@ public class AccountController : ControllerBase
     }
 
 
-    [HttpPost("logout")]
-    public IActionResult Logout()
-    {
-        HttpContext.Response.Cookies.Delete("AuthToken");
-        return Ok();
-    }
 
 
     private bool VerifyPassword(string password, string hashedPassword)

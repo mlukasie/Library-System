@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { checkUserRole } from './services/checkUserRole';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const CreateBook: React.FC = () => {
@@ -11,26 +10,6 @@ const CreateBook: React.FC = () => {
       releaseDate: "",
     });
   const navigate = useNavigate();
-
-  const [isRoleChecked, setIsRoleChecked] = useState(false);
-  const [roleValid, setRoleValid] = useState(true);
-  useEffect(() => {
-      const fetchRole = async () => {
-        const roleValid = await checkUserRole('Librarian');
-        setRoleValid(roleValid);
-        setIsRoleChecked(true);
-      };
-  
-      fetchRole();
-    }, []);
-
-  if (!isRoleChecked) {
-    return <div className="text-center mt-5"><strong>Loading...</strong></div>;
-  }
-
-  if (!roleValid) {
-    navigate('/unauthorized');
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -43,7 +22,10 @@ const CreateBook: React.FC = () => {
           },
           body: JSON.stringify(book), 
         });
-  
+        if (response.status === 401 || response.status === 403) {
+          navigate('/unauthorized');
+          return;
+        }
         if (!response.ok) {
           throw new Error("Failed to update book");
         }

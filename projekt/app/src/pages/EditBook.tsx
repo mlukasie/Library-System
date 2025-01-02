@@ -1,39 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { checkUserRole } from "./services/checkUserRole";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const EditBook: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [book, setBook] = useState({
     title: "",
     author: "",
     publisher: "",
     releaseDate: "",
   });
-  const [isRoleChecked, setIsRoleChecked] = useState(false);
-  const [roleValid, setRoleValid] = useState(true);
-
-  useEffect(() => {
-    const fetchRole = async () => {
-      const roleValid = await checkUserRole('Librarian');
-      setRoleValid(roleValid);
-      setIsRoleChecked(true);
-    };
-
-    fetchRole();
-  }, []);
 
   useEffect(() => {
     const fetchBook = async () => {
       try {
         const response = await fetch(`/api/Books/${id}`);
+        if (response.status === 401 || response.status === 403) {
+          navigate('/unauthorized');
+          return;
+        }
         if (!response.ok) {
           throw new Error("Failed to fetch book details");
         }
         const data = await response.json();
-
         setBook({
           title: data.title,
           author: data.author,
@@ -42,11 +33,13 @@ const EditBook: React.FC = () => {
         });
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchBook();
-  }, [id]);
+  }, [id, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +52,10 @@ const EditBook: React.FC = () => {
         },
         body: JSON.stringify(book), 
       });
-
+      if (response.status === 401 || response.status === 403) {
+        navigate('/unauthorized');
+        return;
+      }
       if (!response.ok) {
         throw new Error("Failed to update book");
       }
@@ -69,13 +65,10 @@ const EditBook: React.FC = () => {
     }
   };
 
-  if (!isRoleChecked) {
-    return <div className="text-center mt-5"><strong>Loading...</strong></div>;
-  }
-
-  if (!roleValid) {
-    navigate('/unauthorized');
-  }
+  if (loading)
+    {
+      return  <div>Loading...</div>;
+    }
 
   return (
     <div className="container mt-5">

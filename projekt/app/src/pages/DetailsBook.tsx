@@ -19,7 +19,7 @@ const DetailsBook: React.FC = () => {
       const fetchBookDetails = async () => {
         try {
           const response = await fetch(`/api/Books/${id}`);
-          if (response.status === 401) {
+          if (response.status === 401 || response.status === 403) {
             navigate('/unauthorized');
             return;
           }
