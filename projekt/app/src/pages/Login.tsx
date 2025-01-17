@@ -3,8 +3,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [Email, setEmail] = useState('');
+  const [Password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
@@ -12,8 +12,8 @@ const Login: React.FC = () => {
     event.preventDefault();
     try {
         const formData = {
-            email: email,
-            password: password,
+            Email: Email,
+            Password: Password,
         };
       const response = await fetch('/api/Account/login', {
         method: 'POST',
@@ -78,7 +78,7 @@ const Login: React.FC = () => {
                               type="email"
                               className="form-control"
                               id="email"
-                              value={email}
+                              value={Email}
                               onChange={(e) => setEmail(e.target.value)}
                               required
                             />
@@ -91,7 +91,7 @@ const Login: React.FC = () => {
                               type="password"
                               className="form-control"
                               id="password"
-                              value={password}
+                              value={Password}
                               onChange={(e) => setPassword(e.target.value)}
                               required
                             />

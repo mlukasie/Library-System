@@ -55,6 +55,35 @@ const LibrarianDashboard: React.FC = () => {
       };
   }
 
+  const handleReservation = async (book_id: number) => {
+    try {
+      const response = await fetch(`/api/ReserveBook/${book_id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert('Something went wrong');
+        throw new Error(errorData.message || 'Failed to reserve the book.');
+        
+      }
+  
+      setBooks((prevBooks) =>
+        prevBooks.map((book) =>
+          book.id === book_id ? { ...book, isAvailable: false } : book
+        )
+      );
+      alert('Book reserved successfully!');
+    } catch (error: any) {
+      console.error('Error reserving book:', error.message);
+      setErrorMessage(error.message || 'Failed to reserve the book.');
+    }
+  }
+  
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -63,25 +92,39 @@ const LibrarianDashboard: React.FC = () => {
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-      <h2>User Dashboard</h2>
-        <button
-          className="btn btn-danger"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
-          {errorMessage && (
-            <div className="alert alert-danger" role="alert">
-                {errorMessage}
-            </div>
-          )}
+        <h2>Dashboard</h2>
+        <div>
+          <button
+            className="btn btn-primary me-2"
+            onClick={() => navigate('/User-Reservations')}
+          >
+            Reservations
+          </button>
+          <button
+            className="btn btn-primary me-2"
+            onClick={() => navigate('/leases')}
+          >
+            Leases
+          </button>
+          <button
+            className="btn btn-primary me-2"
+            onClick={() => navigate('/User-dashboard')}
+          >
+            Books
+          </button>
+          <button
+            className="btn btn-danger"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        </div>
       </div>
       <table className="table table-bordered">
         <thead>
           <tr>
             <th>Title</th>
             <th>Author</th>
-            <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -90,16 +133,23 @@ const LibrarianDashboard: React.FC = () => {
             <tr key={book.id}>
               <td>{book.title}</td>
               <td>{book.author}</td>
-              <td>{book.isAvailable ? "Reservable" : "Not Available"}</td>
               <td>
-                <a href={`/Details/${book.id}`} className="btn btn-secondary btn-sm">Details</a> |{" "}
+                <button
+                  className={`btn btn-${book.isAvailable ? 'success' : 'secondary'} btn-sm`}
+                  disabled={!book.isAvailable}
+                  onClick={() => handleReservation(book.id)}
+                >
+                  {book.isAvailable ? "Reserve" : "Not Available"}
+                </button>
+                | 
+                <a href={`/Details/${book.id}`} className="btn btn-secondary btn-sm">Details</a>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-  );
-};
+  )
+}
 
 export default LibrarianDashboard;

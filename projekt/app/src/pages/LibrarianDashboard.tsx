@@ -64,18 +64,38 @@ const LibrarianDashboard: React.FC = () => {
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-      <h2>Librarian Dashboard</h2>
-        <button
-          className="btn btn-danger"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
+      <h2>Dashboard</h2>
+      <div>
+          <button
+            className="btn btn-primary me-2"
+            onClick={() => navigate('/Librarian-Reservations')}
+          >
+            Reservations
+          </button>
+          <button
+            className="btn btn-primary me-2"
+            onClick={() => navigate('/leases')}
+          >
+            Leases
+          </button>
+          <button
+            className="btn btn-primary me-2"
+            onClick={() => navigate('/Librarian-Dashboard')}
+          >
+            Books
+          </button>
+          <button
+            className="btn btn-danger"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
           {errorMessage && (
             <div className="alert alert-danger" role="alert">
                 {errorMessage}
             </div>
           )}
+        </div>
       </div>
       <div className="mb-3">
         <button className="btn btn-primary me-2" onClick={() => navigate("/Create-book")}>

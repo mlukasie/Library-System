@@ -3,11 +3,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 
 const Register: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [firstname, setFirstname] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [phonenumber, setPhonenumber] = useState('');
-  const [password, setPassword] = useState('');
+  const [Email, setEmail] = useState('');
+  const [FirstName, setFirstname] = useState('');
+  const [LastName, setLastname] = useState('');
+  const [PhoneNumber, setPhonenumber] = useState('');
+  const [Password, setPassword] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
@@ -34,11 +34,11 @@ const Register: React.FC = () => {
     }
     try {
       const formData = {
-        firstname,
-        lastname,
-        phonenumber,
-        email,
-        password,
+        FirstName,
+        LastName,
+        PhoneNumber,
+        Email,
+        Password,
       };
       const response = await fetch('/api/Account/register', {
         method: 'POST',
@@ -83,7 +83,7 @@ const Register: React.FC = () => {
                     type="text"
                     className="form-control"
                     id="firstname"
-                    value={firstname}
+                    value={FirstName}
                     onChange={(e) => setFirstname(e.target.value)}
                     required
                   />
@@ -96,7 +96,7 @@ const Register: React.FC = () => {
                     type="text"
                     className="form-control"
                     id="lastname"
-                    value={lastname}
+                    value={LastName}
                     onChange={(e) => setLastname(e.target.value)}
                     required
                   />
@@ -109,7 +109,7 @@ const Register: React.FC = () => {
                     type="email"
                     className="form-control"
                     id="email"
-                    value={email}
+                    value={Email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
@@ -122,7 +122,7 @@ const Register: React.FC = () => {
                     type="text"
                     className="form-control"
                     id="phonenumber"
-                    value={phonenumber}
+                    value={PhoneNumber}
                     onChange={handlePhoneChange}
                     required
                   />
@@ -138,7 +138,7 @@ const Register: React.FC = () => {
                     type="password"
                     className="form-control"
                     id="password"
-                    value={password}
+                    value={Password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />

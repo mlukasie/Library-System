@@ -99,8 +99,6 @@ public class AccountController : ControllerBase
     }
 
 
-
-
     private bool VerifyPassword(string password, string hashedPassword)
     {
         return hashedPassword == HashPassword(password);

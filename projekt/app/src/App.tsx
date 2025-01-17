@@ -8,6 +8,8 @@ import DetailsBook from './pages/DetailsBook';
 import DeleteBook from './pages/Delete';
 import CreateBook from './pages/CreateBook';
 import Register from './pages/Register';
+import UserReservations from './pages/UserReservations';
+import LibrarianReservations from './pages/LibrarianReservations';
 
 const App: React.FC = () => {
   const routes = [
@@ -19,7 +21,9 @@ const App: React.FC = () => {
     { path: "/Details/:id", element:<DetailsBook />},
     { path: "/Delete/:id", element:<DeleteBook />},
     { path: "/Create-book", element:<CreateBook />},
-    { path: "/Register", element:<Register />}
+    { path: "/Register", element:<Register />},
+    { path: "/User-Reservations", element:<UserReservations />},
+    { path: "/Librarian-Reservations", element:<LibrarianReservations />}
   ];
 
   const element = useRoutes(routes);

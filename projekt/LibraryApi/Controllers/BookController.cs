@@ -36,16 +36,19 @@ public class BooksController : ControllerBase
     [Authorize(Roles = ("User"))]
     public async Task<ActionResult<IEnumerable<UserBook>>> GetUserBooks()
     {
+        
         var books = await _context.Books
             .Where(b => b.IsVisible)
             .ToListAsync();
+        
         var bookDtos = books.Select(b => new UserBook
         {
             Id = b.Id,
             Title = b.Title,
             Author = b.Author,
-            isAvailable = true,
+            isAvailable = this.IsAvailable(b.Id).Result
         });
+
         return Ok(bookDtos);
     }
 
@@ -128,5 +131,15 @@ public class BooksController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    private async Task<bool> IsAvailable(int book_id) 
+    {
+        var oneDayAgo = DateTime.UtcNow.AddDays(-1);
+        var existingReservation = await _context.Reservations
+                .FirstOrDefaultAsync(r => r.BookId == book_id);
+        var existingLease = await _context.Leases
+                .FirstOrDefaultAsync(l => l.BookId == book_id);
+        return existingLease != null || (existingReservation != null && existingReservation.ReservationDate > oneDayAgo) ? false : true;
     }
 }

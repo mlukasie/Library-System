@@ -13,50 +13,53 @@ const DetailsBook: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
 
-    useEffect(() => {
-      const fetchBookDetails = async () => {
-        try {
-          const response = await fetch(`/api/Books/${id}`);
-          if (response.status === 401 || response.status === 403) {
-            navigate('/unauthorized');
-            return;
-          }
-    
-          if (!response.ok) {
-            throw new Error('Failed to fetch book details');
-          }
-    
-          const data = await response.json();
-          setBook(data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setLoading(false);
+  useEffect(() => {
+    const fetchBookDetails = async () => {
+      try {
+        // Fetch book details
+        const bookResponse = await fetch(`/api/Books/${id}`);
+        if (bookResponse.status === 401 || bookResponse.status === 403) {
+          navigate('/unauthorized');
+          return;
         }
-      };
+        if (!bookResponse.ok) {
+          throw new Error('Failed to fetch book details');
+        }
+        const bookData = await bookResponse.json();
+        setBook(bookData);
 
-    
-      fetchBookDetails();
-    }, [id, navigate]);
-
-    const handleBackToDashboard = async() => {
-      const response = await fetch('/api/Account/role', {
-      method: 'GET',
-      credentials: 'include',
-      });
-
-      const roleData = await response.json();
-      const userRole = roleData.role;
-      if (userRole === 'Librarian') {
-        navigate('/Librarian-dashboard');
-      } else if (userRole === 'User') {
-        navigate('/User-dashboard');
-      } else {
-        throw new Error('Unknown role');
+        // Fetch user role
+        const roleResponse = await fetch('/api/Account/role', {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (!roleResponse.ok) {
+          throw new Error('Failed to fetch user role');
+        }
+        const roleData = await roleResponse.json();
+        setUserRole(roleData.role);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
+
+    fetchBookDetails();
+  }, [id, navigate]);
+
+  const handleBackToDashboard = () => {
+    if (userRole === 'Librarian') {
+      navigate('/Librarian-dashboard');
+    } else if (userRole === 'User') {
+      navigate('/User-dashboard');
+    } else {
+      throw new Error('Unknown role');
+    }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -84,9 +87,11 @@ const DetailsBook: React.FC = () => {
       </div>
 
       <div className="mt-4">
-        <button className="btn btn-primary" onClick={() => navigate(`/Edit/${id}`)}>
-          Edit
-        </button>
+        {userRole === 'Librarian' && (
+          <button className="btn btn-primary" onClick={() => navigate(`/Edit/${id}`)}>
+            Edit
+          </button>
+        )}
         <button className="btn btn-secondary ms-2" onClick={handleBackToDashboard}>
           Back to Dashboard
         </button>
