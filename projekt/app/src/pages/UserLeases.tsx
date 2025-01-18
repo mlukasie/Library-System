@@ -2,43 +2,42 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-interface Reservation {
+interface Lease {
   id: number;
-  userId: number;
   bookId: number;
-  reservationDate: string;
   bookTitle: string;
-  userEmail: string;
+  leaseDate: string;
+  isActive: boolean;
 }
 
-const UserReservations: React.FC = () => {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
+const UserLeases: React.FC = () => {
+  const [leases, setLeases] = useState<Lease[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchReservations = async () => {
+    const fetchLeases = async () => {
       try {
-        const response = await fetch("/api/User/Reservations");
+        const response = await fetch('/api/User/Leases');
         if (response.status === 401 || response.status === 403) {
           navigate('/unauthorized');
           return;
         }
         if (!response.ok) {
-          throw new Error("Failed to fetch reservations");
+          throw new Error('Failed to fetch leases');
         }
         const data = await response.json();
-        setReservations(data);
-      } catch (error) {
-        console.error("Error fetching reservations:", error);
-        setErrorMessage('Failed to load reservations.');
+        setLeases(data);
+      } catch (error: any) {
+        console.error('Error fetching leases:', error.message);
+        setErrorMessage(error.message || 'Failed to load leases.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchReservations();
+    fetchLeases();
   }, [navigate]);
 
   const handleLogout = async () => {
@@ -57,26 +56,6 @@ const UserReservations: React.FC = () => {
       setErrorMessage(error.message || 'Logout failed.');
     };
 }
-
-  const handleCancel = async (reservationId: number) => {
-    try {
-      const response = await fetch(`/api/Reservation/${reservationId}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to cancel reservation.');
-      }
-
-      setReservations((prevReservations) =>
-        prevReservations.filter((reservation) => reservation.id !== reservationId)
-      );
-      alert('Reservation canceled successfully!');
-    } catch (error: any) {
-      console.error('Error canceling reservation:', error.message);
-      setErrorMessage(error.message || 'Failed to cancel reservation.');
-    }
-  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -121,39 +100,21 @@ const UserReservations: React.FC = () => {
           </button>
         </div>
       </div>
-      {errorMessage && (
-        <div className="alert alert-danger" role="alert">
-          {errorMessage}
-        </div>
-      )}
+      {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
       <table className="table table-bordered">
         <thead>
           <tr>
             <th>Book Title</th>
-            <th>Reservation Date</th>
-            <th>Actions</th>
+            <th>Lease Date</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
-          {reservations.map((reservation) => (
-            <tr key={reservation.id}>
-              <td>
-                <a
-                  href={`/Details/${reservation.bookId}`}
-                  className="text-primary"
-                >
-                  {reservation.bookTitle}
-                </a>
-              </td>
-              <td>{new Date(reservation.reservationDate).toLocaleString()}</td>
-              <td>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => handleCancel(reservation.id)}
-                >
-                  Cancel
-                </button>
-              </td>
+          {leases.map((lease) => (
+            <tr key={lease.id}>
+              <td>{lease.bookTitle}</td>
+              <td>{new Date(lease.leaseDate).toLocaleString()}</td>
+              <td>{lease.isActive ? 'Active' : 'Returned'}</td>
             </tr>
           ))}
         </tbody>
@@ -162,4 +123,4 @@ const UserReservations: React.FC = () => {
   );
 };
 
-export default UserReservations;
+export default UserLeases;

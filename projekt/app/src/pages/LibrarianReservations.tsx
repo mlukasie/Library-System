@@ -77,18 +77,21 @@ const LibrarianReservations: React.FC = () => {
     }
   };
 
-  const handleLease = async (bookId: number) => {
+  const handleLease = async (reservationID: number) => {
     try {
-      const response = await fetch(`/api/Leases/LeaseBook/${bookId}`, {
+      const response = await fetch(`/api/LeaseBook/${reservationID}`, {
         method: 'POST',
       });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to lease the book.');
       }
-
+      setReservations((prevReservations) =>
+        prevReservations.filter((reservation) => reservation.id !== reservationID)
+      );
       alert('Book leased successfully!');
     } catch (error: any) {
+      alert('Couln`t lease book')
       console.error('Error leasing book:', error.message);
       setErrorMessage(error.message || 'Failed to lease the book.');
     }
@@ -120,7 +123,16 @@ const LibrarianReservations: React.FC = () => {
 
   return (
     <div className="container mt-4">
-      <div className="d-flex justify-content-end mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+      <h2>
+      <button
+          className="btn btn-primary"
+          onClick={() => navigate('/User-details')}
+        >
+          My Profile
+        </button>
+      </h2>
+      <div>
           <button
             className="btn btn-primary me-2"
             onClick={() => navigate('/Librarian-Reservations')}
@@ -129,7 +141,7 @@ const LibrarianReservations: React.FC = () => {
           </button>
           <button
             className="btn btn-primary me-2"
-            onClick={() => navigate('/leases')}
+            onClick={() => navigate('/Librarian-Leases')}
           >
             Leases
           </button>
@@ -140,17 +152,17 @@ const LibrarianReservations: React.FC = () => {
             Books
           </button>
           <button
-            className="btn btn-secondary me-2"
-            onClick={handleDeleteInactiveReservations}
-          >
-            Delete Inactive Reservations
-          </button>
-          <button
             className="btn btn-danger"
             onClick={handleLogout}
           >
             Logout
           </button>
+          {errorMessage && (
+            <div className="alert alert-danger" role="alert">
+                {errorMessage}
+            </div>
+          )}
+        </div>
       </div>
       {errorMessage && (
         <div className="alert alert-danger" role="alert">
@@ -182,7 +194,7 @@ const LibrarianReservations: React.FC = () => {
               <td>
                 <button
                   className="btn btn-success btn-sm me-2"
-                  onClick={() => handleLease(reservation.bookId)}
+                  onClick={() => handleLease(reservation.id)}
                 >
                   Lease Book
                 </button>

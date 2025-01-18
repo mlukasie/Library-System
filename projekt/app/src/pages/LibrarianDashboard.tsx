@@ -64,7 +64,14 @@ const LibrarianDashboard: React.FC = () => {
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-      <h2>Dashboard</h2>
+      <h2>
+      <button
+          className="btn btn-primary"
+          onClick={() => navigate('/User-details')}
+        >
+          My Profile
+        </button>
+      </h2>
       <div>
           <button
             className="btn btn-primary me-2"
@@ -74,7 +81,7 @@ const LibrarianDashboard: React.FC = () => {
           </button>
           <button
             className="btn btn-primary me-2"
-            onClick={() => navigate('/leases')}
+            onClick={() => navigate('/Librarian-Leases')}
           >
             Leases
           </button>

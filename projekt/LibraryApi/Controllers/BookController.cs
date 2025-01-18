@@ -28,7 +28,8 @@ public class BooksController : ControllerBase
             Title = b.Title,
             Author = b.Author,
             IsVisible = b.IsVisible,
-        });
+        })
+            .OrderByDescending(b => b.IsVisible);
         return Ok(bookDtos);
     }
 
@@ -127,10 +128,31 @@ public class BooksController : ControllerBase
             return NotFound();
         }
 
-        _context.Books.Remove(book);
-        await _context.SaveChangesAsync();
+        var existingReservation = await _context.Reservations.FirstOrDefaultAsync(r => r.BookId == id);
+        var activeLease = await _context.Leases.FirstOrDefaultAsync(l => (l.BookId == id && l.IsActive));
 
-        return NoContent();
+
+        if (existingReservation != null || activeLease != null)
+        {
+
+            return Conflict(new { message = "Can't delete the book" });
+        }
+
+        var inactiveLease = await _context.Leases.FirstOrDefaultAsync(l => (l.BookId == id && !l.IsActive));
+
+        if (inactiveLease != null)
+        {
+            book.IsVisible = false;
+            _context.Books.Update(book);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+        else {
+            _context.Books.Remove(book);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+        
     }
 
     private async Task<bool> IsAvailable(int book_id) 
@@ -139,7 +161,9 @@ public class BooksController : ControllerBase
         var existingReservation = await _context.Reservations
                 .FirstOrDefaultAsync(r => r.BookId == book_id);
         var existingLease = await _context.Leases
-                .FirstOrDefaultAsync(l => l.BookId == book_id);
+                .FirstOrDefaultAsync(l => l.BookId == book_id && l.IsActive);
         return existingLease != null || (existingReservation != null && existingReservation.ReservationDate > oneDayAgo) ? false : true;
     }
+
+
 }

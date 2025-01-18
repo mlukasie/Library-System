@@ -2,6 +2,7 @@
 using LibraryApi.Models.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -72,6 +73,55 @@ public class AccountController : ControllerBase
 
         return Ok(new { message = "Login successful" });
     }
+
+    [Authorize]
+    [HttpGet("Details")]
+    public async Task<ActionResult<UserDTO>> MyDetails()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var user = await _context.Users.FindAsync(int.Parse(userId));
+        if (user == null)
+        {
+            return NotFound();
+        }
+        var userDTO = new UserDTO
+        {
+            Id = user.Id,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+        };
+
+        return Ok(userDTO);
+    }
+
+    [Authorize]
+    [HttpDelete("Delete")]
+    public async Task<IActionResult> Delete()
+    {
+        if (User.IsInRole("Librarian"))
+        {
+            return Conflict(new {message = "Can`t delete librarian account"});
+        }
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+        bool hasReservations = await _context.Reservations.AnyAsync(r => r.UserId == userId);
+        bool hasActiveLeases = await _context.Leases.AnyAsync(l => l.UserId == userId && l.IsActive);
+
+
+        if (!hasReservations && !hasActiveLeases)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return Ok(new { status = "Resource deleted" });
+        }
+
+        return Conflict(new { message = "Can`t delete this account" });
+    }
+
+
 
     [HttpGet("role")]
     [Authorize]

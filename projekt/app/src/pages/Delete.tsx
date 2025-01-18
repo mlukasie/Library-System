@@ -51,6 +51,7 @@ const DeleteBook: React.FC = () => {
           return;
         }
         if (!response.ok) {
+            alert('Couldn`t delete book')
             throw new Error('Failed to delete book');
         }
         alert('Book deleted successfully!');
