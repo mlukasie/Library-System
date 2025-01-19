@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CONFIG from '../config';
 
 interface Book {
   title: string;
@@ -19,8 +20,9 @@ const DetailsBook: React.FC = () => {
   useEffect(() => {
     const fetchBookDetails = async () => {
       try {
-        // Fetch book details
-        const bookResponse = await fetch(`/api/Books/${id}`);
+        const bookResponse = await fetch(`${CONFIG.API_URL}/api/Books/${id}`, {
+        credentials: 'include',
+        });
         if (bookResponse.status === 401 || bookResponse.status === 403) {
           navigate('/unauthorized');
           return;
@@ -31,8 +33,8 @@ const DetailsBook: React.FC = () => {
         const bookData = await bookResponse.json();
         setBook(bookData);
 
-        // Fetch user role
-        const roleResponse = await fetch('/api/Account/role', {
+        
+        const roleResponse = await fetch(`${CONFIG.API_URL}/api/Account/role`, {
           method: 'GET',
           credentials: 'include',
         });

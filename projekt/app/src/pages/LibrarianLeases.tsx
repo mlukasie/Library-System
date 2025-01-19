@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CONFIG from '../config';
 
 interface Lease {
   id: number;
@@ -20,7 +21,8 @@ const LibrarianLeases: React.FC = () => {
   useEffect(() => {
     const fetchLeases = async () => {
       try {
-        const response = await fetch('/api/Librarian/Leases');
+        const response = await fetch(`${CONFIG.API_URL}/api/Librarian/Leases`, {
+            credentials: 'include',});
         if (response.status === 401 || response.status === 403) {
           navigate('/unauthorized');
           return;
@@ -43,8 +45,9 @@ const LibrarianLeases: React.FC = () => {
 
   const handleChangeStatus = async (leaseId: number) => {
     try {
-      const response = await fetch(`/api/Lease/ChangeStatus/${leaseId}`, {
+      const response = await fetch(`${CONFIG.API_URL}/api/Lease/ChangeStatus/${leaseId}`, {
         method: 'PUT',
+        credentials: 'include',
       });
       if (!response.ok) {
         throw new Error('Failed to update lease status');
@@ -64,8 +67,9 @@ const LibrarianLeases: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/Account/logout', {
+      const response = await fetch(`${CONFIG.API_URL}/api/Account/logout`, {
         method: 'POST',
+        credentials: 'include',
       });
       if (!response.ok) {
         const errorData = await response.json();

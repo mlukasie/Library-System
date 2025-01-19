@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CONFIG from '../config';
 
 interface Reservation {
   id: number;
@@ -20,7 +21,8 @@ const LibrarianReservations: React.FC = () => {
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const response = await fetch('/api/Librarian/Reservations');
+        const response = await fetch(`${CONFIG.API_URL}/api/Librarian/Reservations`, {
+          credentials: 'include',});
         if (response.status === 401 || response.status === 403) {
           navigate('/unauthorized');
           return;
@@ -43,8 +45,9 @@ const LibrarianReservations: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/Account/logout', {
+      const response = await fetch(`${CONFIG.API_URL}/api/Account/logout`, {
         method: 'POST',
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -59,8 +62,9 @@ const LibrarianReservations: React.FC = () => {
 
   const handleCancel = async (reservationId: number) => {
     try {
-      const response = await fetch(`/api/Reservation/${reservationId}`, {
+      const response = await fetch(`${CONFIG.API_URL}/api/Reservation/${reservationId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -79,8 +83,9 @@ const LibrarianReservations: React.FC = () => {
 
   const handleLease = async (reservationID: number) => {
     try {
-      const response = await fetch(`/api/LeaseBook/${reservationID}`, {
+      const response = await fetch(`${CONFIG.API_URL}/api/LeaseBook/${reservationID}`, {
         method: 'POST',
+        credentials: 'include',
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -99,8 +104,9 @@ const LibrarianReservations: React.FC = () => {
 
   const handleDeleteInactiveReservations = async () => {
     try {
-      const response = await fetch('/api/InactiveReservations', {
+      const response = await fetch(`${CONFIG.API_URL}/api/InactiveReservations`, {
         method: 'DELETE',
+        credentials: 'include',
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -133,6 +139,12 @@ const LibrarianReservations: React.FC = () => {
         </button>
       </h2>
       <div>
+      <button
+            className="btn btn-primary me-2"
+            onClick={() => handleDeleteInactiveReservations()}
+          >
+            Delete Inactive Reservations
+          </button>
           <button
             className="btn btn-primary me-2"
             onClick={() => navigate('/Librarian-Reservations')}

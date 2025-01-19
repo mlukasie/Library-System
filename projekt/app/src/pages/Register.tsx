@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
+import CONFIG from '../config';
 
 const Register: React.FC = () => {
   const [Email, setEmail] = useState('');
@@ -40,12 +41,13 @@ const Register: React.FC = () => {
         Email,
         Password,
       };
-      const response = await fetch('/api/Account/register', {
+      const response = await fetch(`${CONFIG.API_URL}/api/Account/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
+        credentials: 'include',
       });
 
       if (!response.ok) {

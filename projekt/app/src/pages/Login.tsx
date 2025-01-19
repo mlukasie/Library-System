@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
+import CONFIG from '../config';
 
 const Login: React.FC = () => {
   const [Email, setEmail] = useState('');
@@ -15,12 +16,13 @@ const Login: React.FC = () => {
             Email: Email,
             Password: Password,
         };
-      const response = await fetch('/api/Account/login', {
+      const response = await fetch(`${CONFIG.API_URL}/api/Account/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -28,7 +30,7 @@ const Login: React.FC = () => {
         throw new Error(errorData.message || 'Login failed');
       };
 
-      const roleResponse = await fetch('/api/Account/role', {
+      const roleResponse = await fetch(`${CONFIG.API_URL}/api/Account/role`, {
         method: 'GET',
         credentials: 'include',
       });

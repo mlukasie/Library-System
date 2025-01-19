@@ -64,12 +64,13 @@ public class AccountController : ControllerBase
         var token = _jwtService.GenerateToken(user);
         var cookieOptions = new CookieOptions
         {
-            HttpOnly = true,      
-            Expires = DateTime.UtcNow.AddHours(1), 
-            Secure = true      
+            HttpOnly = true,
+            Expires = DateTime.UtcNow.AddHours(1),
+            SameSite = SameSiteMode.Lax,
+            Secure = false,
         };
 
-        HttpContext.Response.Cookies.Append("AuthToken", token, cookieOptions);
+        HttpContext.Response.Cookies.Append("authToken", token, cookieOptions);
 
         return Ok(new { message = "Login successful" });
     }
@@ -135,7 +136,7 @@ public class AccountController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        HttpContext.Response.Cookies.Delete("AuthToken");
+        HttpContext.Response.Cookies.Delete("authToken");
         return Ok();
     }
 

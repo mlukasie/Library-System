@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CONFIG from "../config";
 
 const EditBook: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,7 +17,8 @@ const EditBook: React.FC = () => {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const response = await fetch(`/api/Books/${id}`);
+        const response = await fetch(`${CONFIG.API_URL}/api/Books/${id}`, {
+          credentials: 'include',});
         if (response.status === 401 || response.status === 403) {
           navigate('/unauthorized');
           return;
@@ -45,12 +47,13 @@ const EditBook: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(`/api/Books/${id}`, {
+      const response = await fetch(`${CONFIG.API_URL}/api/Books/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(book), 
+        body: JSON.stringify(book),
+        credentials: 'include',
       });
       if (response.status === 401 || response.status === 403) {
         navigate('/unauthorized');

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CONFIG from '../config';
 
 interface UserDTO {
   id: string;
@@ -20,7 +21,8 @@ const UserDetails: React.FC = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch('/api/Account/Details');
+        const response = await fetch(`${CONFIG.API_URL}/api/Account/Details`, {
+            credentials: 'include',});
         if (response.status === 401 || response.status === 403) {
           navigate('/unauthorized');
           return;
@@ -31,7 +33,7 @@ const UserDetails: React.FC = () => {
         const data: UserDTO = await response.json();
         setUser(data);
 
-        const roleResponse = await fetch('/api/Account/role', {
+        const roleResponse = await fetch(`${CONFIG.API_URL}/api/Account/role`, {
           method: 'GET',
           credentials: 'include',
         });
@@ -64,7 +66,7 @@ const UserDetails: React.FC = () => {
   const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       try {
-        const response = await fetch('/api/Account/Delete', {
+        const response = await fetch(`${CONFIG.API_URL}/api/Account/Delete`, {
           method: 'DELETE',
           credentials: 'include',
         });

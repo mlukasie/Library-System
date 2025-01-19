@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CONFIG from '../config';
 
 interface Book {
   id: number;
@@ -19,7 +20,8 @@ const LibrarianDashboard: React.FC = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await fetch("/api/Books/LibrarianBooks");
+        const response = await fetch(`${CONFIG.API_URL}/api/Books/LibrarianBooks`, {
+          credentials: 'include',});
         if (response.status === 401 || response.status === 403) {
           navigate('/unauthorized');
           return;
@@ -41,8 +43,9 @@ const LibrarianDashboard: React.FC = () => {
 
   const handleLogout = async () => {
       try {
-        const response = await fetch('/api/Account/logout', {
+        const response = await fetch(`${CONFIG.API_URL}/api/Account/logout`, {
           method: 'POST',
+          credentials: 'include',
         });
         if (!response.ok) {
           const errorData = await response.json();

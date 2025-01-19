@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CONFIG from '../config';
 
 interface Lease {
   id: number;
@@ -19,7 +20,8 @@ const UserLeases: React.FC = () => {
   useEffect(() => {
     const fetchLeases = async () => {
       try {
-        const response = await fetch('/api/User/Leases');
+        const response = await fetch(`${CONFIG.API_URL}/api/User/Leases`, {
+            credentials: 'include',});
         if (response.status === 401 || response.status === 403) {
           navigate('/unauthorized');
           return;
@@ -42,8 +44,9 @@ const UserLeases: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/Account/logout', {
+      const response = await fetch(`${CONFIG.API_URL}/api/Account/logout`, {
         method: 'POST',
+        credentials: 'include',
       });
 
       if (!response.ok) {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CONFIG from '../config';
 
 const CreateBook: React.FC = () => {
   const [book, setBook] = useState({
@@ -15,12 +16,13 @@ const CreateBook: React.FC = () => {
       e.preventDefault();
   
       try {
-        const response = await fetch(`/api/Books/`, {
+        const response = await fetch(`${CONFIG.API_URL}/api/Books/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(book), 
+          body: JSON.stringify(book),
+          credentials: 'include',
         });
         if (response.status === 401 || response.status === 403) {
           navigate('/unauthorized');

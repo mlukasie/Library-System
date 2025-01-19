@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CONFIG from '../config';
 
 interface Book {
   title: string;
@@ -19,7 +20,9 @@ const DeleteBook: React.FC = () => {
   useEffect(() => {
     const fetchBookDetails = async () => {
       try {
-        const response = await fetch(`/api/Books/${id}`);
+        const response = await fetch(`${CONFIG.API_URL}/api/Books/${id}`, {
+        credentials: 'include',
+      });
         if (response.status === 401 || response.status === 403) {
           navigate('/unauthorized');
           return;
@@ -43,8 +46,9 @@ const DeleteBook: React.FC = () => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this book?')) {
         try {
-        const response = await fetch(`/api/Books/${id}`, {
+        const response = await fetch(`${CONFIG.API_URL}/api/Books/${id}`, {
             method: 'DELETE',
+            credentials: 'include',
         });
         if (response.status === 401 || response.status === 403) {
           navigate('/unauthorized');
